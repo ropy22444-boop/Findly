@@ -1,3 +1,9 @@
+export const config = {
+  api: {
+    bodyParser: true,
+  },
+};
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -11,13 +17,18 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = req.headers['x-api-key'] || req.body?.apiKey;
-
-  if (!apiKey) {
-    return res.status(401).json({ error: 'No API key provided' });
+  let body = req.body;
+  if (typeof body === 'string') {
+    try { body = JSON.parse(body); } catch(e) { body = {}; }
   }
 
-  const { apiKey: _removed, ...bodyWithoutKey } = req.body || {};
+  const apiKey = req.headers['x-api-key'] || body?.apiKey;
+
+  if (!apiKey || !apiKey.startsWith('sk-ant-')) {
+    return res.status(401).json({ error: 'No valid API key provided', received: !!apiKey });
+  }
+
+  const { apiKey: _removed, ...bodyWithoutKey } = body;
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
