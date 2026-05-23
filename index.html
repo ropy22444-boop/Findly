@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -472,7 +473,8 @@ async function sendMessage() {
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
         system: SYSTEM,
-        messages: history
+        messages: history,
+        apiKey: apiKey
       })
     });
     const data = await res.json();
